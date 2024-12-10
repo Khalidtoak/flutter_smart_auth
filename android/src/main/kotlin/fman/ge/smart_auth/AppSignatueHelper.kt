@@ -31,18 +31,18 @@ class AppSignatureHelper(context: Context) : ContextWrapper(context) {
             val packageName = packageName
             val packageManager = packageManager
 
-            val signatures: Array<Signature> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val signatures: Array<Signature>? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 packageManager.getPackageInfo(
                     packageName,
                     PackageManager.GET_SIGNING_CERTIFICATES
-                ).signingInfo.apkContentsSigners
+                ).signingInfo?.apkContentsSigners
             } else {
                 packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES).signatures
             }
 
             signatures
-                .mapNotNull { hash(packageName, it.toCharsString()) }
-                .mapTo(appCodes) { it }
+                ?.mapNotNull { hash(packageName, it.toCharsString()) }
+                ?.mapTo(appCodes) { it }
             return appCodes
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Unable to find package to obtain hash.", e)
